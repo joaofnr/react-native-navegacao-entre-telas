@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { FlatList, Text, StyleSheet } from 'react-native';
 
 import Produtor from './componentes/Produtor';
@@ -10,16 +10,30 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 export default function Produtores({ melhoresProdutores }) {
   const navigation = useNavigation();
   const route = useRoute();
+  const [ exibeMensagem, setExibeMensagem ] = useState(false)
   const lista = useProdutores(melhoresProdutores);
   const { tituloProdutores, mensagemCompra } = useTextos();
   
   const nomeCompra = route.params?.compra.nome;
+  const timeStampCompra = route.params?.compra.timestamp
   const mensagemCompleta = mensagemCompra?.replace('$NOME', nomeCompra);
+
+  useEffect( () => {
+    setExibeMensagem(!!nomeCompra);
+    let timeout;
+    if (timeStampCompra) {
+      timeout = setTimeout( () => {
+        setExibeMensagem(false)
+      }, 5000)
+    }
+
+    return () => clearTimeout(timeout);
+  }, [timeStampCompra])
   
   const TopoLista = () => {
     return <>
       <Topo melhoresProdutores={melhoresProdutores} />
-      { !!nomeCompra && <Text style={estilos.compra}>{mensagemCompleta}</Text> }
+      { exibeMensagem && <Text style={estilos.compra}>{mensagemCompleta}</Text> }
       <Text style={estilos.titulo}>{tituloProdutores}</Text>
     </>
   }
